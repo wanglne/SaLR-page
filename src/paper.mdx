@@ -1,218 +1,135 @@
 ---
-# This title is used for the browser tab and the link-preview card (see the
-# "description" and "thumbnail" keys below). The title displayed at the top of
-# the page is set separately, on the <Header> component in the body.
-title: Academic Project Page Template
-
-# The color theme of the page. Defaults to "device" (the preference set in the user's brower or operating system). Setting this to "light" or "dark" will override the user's preference. This is useful if your figures only look good in one theme.
-theme: device
-
-# This is the icon that appears in the user's browser tab. To customize, change the favicon.svg file in /public/, or add your own file to /public/ and change the filename here.
+title: "SaLR | Safety-Aware Latent Space Reasoning | NeurIPS 2026"
+theme: light
 favicon: favicon.svg
-
-# These keys are optional. If a link to your project page is in a Google search result, text message, or social media post, it will often appear as a "link preview card" based on its title, description, favicon, and thumbnail. After you publish your page, you can double check that these previews look right using [this tool](https://linkpreview.xyz/)
-description: Simple project page template for your research paper, built with Astro and Tailwind
-thumbnail: screenshot-light.png
+description: "Efficient reasoning needs safety, too. SaLR reveals the safety risks of latent reasoning and shows how to improve jailbreak robustness while retaining reasoning utility and token efficiency."
+thumbnail: social-preview.png
 ---
 
 import Header from "./components/Header.astro";
-import Video from "./components/Video.astro";
-import HighlightedSection from "./components/HighlightedSection.astro";
-import SmallCaps from "./components/SmallCaps.astro";
-import Figure from "./components/Figure.astro";
-import Picture from "./components/Picture.astro";
-import ModelViewer from "./components/ModelViewer.astro"
-import TwoColumns from "./components/TwoColumns.astro";
-import YouTubeVideo from "./components/YouTubeVideo.astro";
-import Carousel from "./components/Carousel.astro";
-import CarouselSlide from "./components/CarouselSlide.astro";
-import Wide from "./components/Wide.astro";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/starwind/tabs";
-import { Comparison } from "./components/Comparison.tsx";
-
-import outside from "./assets/outside.mp4";
-import dogsDiffc from "./assets/dogs-diffc.png"
-import dogsTrue from "./assets/dogs-true.png"
-import dogsMsillm from "@/assets/dogs-msillm.jpg"
+import PaperFigure from "./components/PaperFigure.astro";
+import Results from "./components/Results.astro";
+import AttackResults from "./components/AttackResults.astro";
 
 <Header
-  title="Academic Project Page Template"
-  conference="Conference Name"
+  title="Safety-Aware Latent Space Reasoning in Large Language Models"
+  affiliation="ShanghaiTech University"
   authors={[
-    {
-      name: "Roman Hauksson",
-      url: "https://roman.technology",
-      institution: "University of Texas at Dallas",
-      notes: ["*", "†"],
-    },
-    { name: "Author Two", institution: "Institution Two", notes: ["*", "†"] },
-    { name: "Author Three", institution: "Institution Three", notes: ["*"] },
-    { name: "Author Four", institution: "Institution Four" },
-  ]}
-  notes={[
-    { symbol: "*", text: "author note one" },
-    { symbol: "†", text: "author note two" },
+    { name: "Yi Wang", url: "https://wanglne.github.io/", notes: "*" },
+    { name: "Wenjie Wang", url: "https://wwj95.github.io/", notes: "*†" },
+    { name: "Hongye Qiu", url: "https://openreview.net/profile?id=~Hongye_Qiu1" },
+    { name: "Yu Pan", url: "https://openreview.net/profile?id=~Yu_Pan11" },
   ]}
   links={[
-    { name: "Paper", url: "https://github.com/RomanHauksson/academic-project-astro-template", icon: "ri:file-pdf-2-line" },
-    { name: "Code", url: "https://github.com/RomanHauksson/academic-project-astro-template", icon: "ri:github-line" },
-    { name: "arXiv", url: "https://github.com/RomanHauksson/academic-project-astro-template", icon: "academicons:arxiv" },
-    { name: "Slides", url: "https://github.com/RomanHauksson/academic-project-astro-template", icon: "ri:slideshow-2-line" },
+    { name: "Paper", url: "https://wanglne.github.io/papers/SaLR_NIPS2026.pdf", icon: "ri:file-pdf-2-line" },
+    { name: "Code", url: "https://github.com/wanglne/SaLR", icon: "ri:github-line" },
+    { name: "OpenReview", url: "https://openreview.net/forum?id=v5ExASonPK", icon: "ri:article-line" },
   ]}
->
-  {/*
-    Optionally place a cover image or video behind the header. Import the
-    asset (from src/assets/, so images are optimized) and pass it through the
-    "background" slot using the Picture or Video component:
+/>
 
-      <Picture slot="background" src={cover} alt="" />
-      <Video slot="background" src={outside} controls={false} />
-  */}
-  <Picture slot="background" src={dogsTrue} alt="" priority />
-</Header>
+<section id="impact" className="lead-section full-bleed" aria-labelledby="impact-title">
+  <div className="section-inner">
+  <h2 id="impact-title">Impact</h2>
+  <p className="lead-copy"><strong>Reasoning gets shorter. Safety should not get weaker.</strong> Moving reasoning from words into hidden states saves tokens—but can weaken a model’s safety alignment. <strong>SaLR brings safety into latent reasoning</strong>, substantially reducing jailbreak success while retaining most of its reasoning utility and token efficiency.</p>
+  </div>
+</section>
 
-<HighlightedSection>
+<div className="headline-results breakout not-prose">
+  <article><span className="metric">≤ 3.1<span>%</span></span><h3>Jailbreak attack success</h3><p>Across all 24 GCG/PAIR settings: four benchmarks and three model scales.</p><a href="#results" data-result-category="safety">Explore safety results →</a></article>
+  <article><span className="metric">55.74<span>%</span></span><h3>OOD reasoning accuracy</h3><p>Compared with CODI’s 55.84% on the 1B model, with the same 7.5 average generated tokens.</p><a href="#results" data-result-category="reasoning">Compare reasoning utility →</a></article>
+  <article><span className="metric">39<span>×</span></span><h3>Fewer generated tokens</h3><p>7.5 vs. 293.3 on 1B OOD math tasks, compared with SFT-CoT + SafeChain.</p><a href="#results" data-result-category="reasoning">Compare token counts →</a></article>
+</div>
+<p className="metric-source">Results from Tables 2–3. Attack success rates are reported means; OOD averages cover GSM-Hard, MultiArith, and SVAMP. The token ratio is rounded and does not measure wall-clock speedup.</p>
 
-## Abstract
+<section id="abstract" aria-labelledby="abstract-title">
 
-This is a template you can use to create a professional-looking, accessible, and performant project page for your research paper. [See the code for the template and instructions on how to use it yourself on GitHub](https://github.com/RomanHauksson/academic-project-astro-template). It's made with the [Astro web framework](https://astro.build/) and styled with [Tailwind](https://tailwindcss.com/). You write the content in [MDX](https://mdxjs.com/), which enables markdown formatting like **bold**, _italics_, and ~strikethrough~, as well as custom components like <SmallCaps>small caps.</SmallCaps>
+<h2 id="abstract-title">Abstract</h2>
 
-</HighlightedSection>
+Latent space reasoning improves inference efficiency by compressing chain-of-thought (CoT) reasoning into continuous latent states, but its safety alignment remains poorly understood. In this work, we conduct the first systematic safety study of latent space reasoning models under jailbreak attacks. Our results reveal that most latent reasoning methods exhibit higher vulnerability to jailbreak attacks than both the base model and token-space CoT reasoning counterparts, suggesting that moving reasoning into latent states can weaken safety alignment. To address this issue, we propose **SaLR**, a **S**afety-**a**ware **L**atent space **R**easoning framework that injects safety supervision into latent space reasoning. SaLR converts long-form safety reasoning into a compact four-block safe-chain and transfers this safety signal through teacher-student hidden state distillation. For safety instances, SaLR aligns an early safe response prefix to guide the model toward a safe response trajectory; for reasoning instances, it retains single-position distillation to maintain reasoning utility. Experiments across model scales and harmful benchmarks show that SaLR substantially reduces jailbreak attack success while retaining most of the reasoning utility and token efficiency. Beyond standard jailbreaks, SaLR also shows robustness to reasoning-specific attacks such as token inflation and CoT hijacking, while using a fixed latent reasoning budget and avoiding exposed textual reasoning traces. Overall, SaLR provides a favorable safety–utility trade-off for latent space reasoning. Code is available in the [SaLR repository](https://github.com/wanglne/SaLR).
 
-## Visuals
+</section>
 
-### Image
+<section id="overview" aria-labelledby="overview-title">
 
-Use the `Picture` component to display images. If you have a figure in PDF format, you can pass in its path as the `src` prop and it will be converted into a web-friendly image automatically.
+<h2 id="overview-title">Overview</h2>
 
-<Picture src={dogsDiffc} alt="Photo of two running dogs, lossily compressed using the DiffC algorithm" />
+### A safety blind spot in efficient reasoning
 
-### Video
+Latent reasoning replaces long, visible chains of thought with a small number of continuous hidden states. This makes reasoning more compact, but it also changes where safety must be learned—and how it can be evaluated.
 
-<Video src={outside} />
+Our evaluation reveals a recurring problem: **existing latent reasoning baselines are generally more vulnerable to jailbreaks than the base model and explicit chain-of-thought counterparts.** On 1B AdvBench, for example, CODI reaches 90.9% attack success under GCG, compared with 38.8% for the base model. SaLR brings this down to 2.7%.
 
-### Wide visual
+<PaperFigure name="intro" alt="SaLR overview: latent reasoning baselines show higher jailbreak attack success and weaker separation of safe and unsafe representations; compact safety supervision improves the safety–utility balance.">
+  <strong>Efficiency changes the safety problem.</strong> The paper’s overview connects jailbreak vulnerability, reduced separation of safe and unsafe representations, and SaLR’s safety–utility balance.
+</PaperFigure>
 
-I constrained the maximum width of the text column to make sure it's readable even when the screen is wide. But images and other visuals should "break out" and take up more horizontal space: for this, try wrapping them in the `Wide` component.
+<div className="takeaway">
+  <p className="eyebrow">Why this matters</p>
+  <p><strong>Safety cannot be assumed to survive a change in how a model reasons.</strong> As reasoning moves into less directly inspectable representations, accuracy and token savings alone are not enough to judge progress. Safety needs to be measured—and trained for—alongside them.</p>
+</div>
 
-<Wide>
-  <Picture src={dogsDiffc} alt="Photo of two running dogs, lossily compressed using the DiffC algorithm" />
-</Wide>
+</section>
 
-### Figure with caption
+<section id="methodology" aria-labelledby="methodology-title">
 
-Wrap a visual in a `Figure` component to add a caption.
+<h2 id="methodology-title">Methodology</h2>
 
-<Figure>
-  <Picture slot="figure" src={dogsDiffc} alt="Photo of two running dogs, lossily compressed using the DiffC algorithm" />
-  <Fragment slot="caption">A photo of two dogs running side-by-side in shallow water, lossily compressed using the [DiffC algorithm](https://jeremyiv.github.io/diffc-project-page/).</Fragment>
-</Figure>
+### Safety belongs where the answer begins
 
-### Comparison slider
+SaLR treats safety as part of learning to reason in latent space. A compact safety trace preserves four decisions: **understand the request, assess the risk, choose an action, and provide a safe continuation.** This gives the model a concise safety signal that fits the limited capacity of latent reasoning.
 
-Use the `Comparison` component to compare two visuals with an interactive slider.
+During training, a teacher transfers this signal through hidden states at the beginning of the safe response. Mathematical examples retain their reasoning-focused supervision. At inference, the student reasons with a fixed latent budget, without generating a long, exposed chain of thought.
 
-<Comparison client:idle >
-  <Picture slot="itemOne" src={dogsDiffc} alt="Photo of two running dogs, lossily compressed using the DiffC algorithm" />
-  <Picture slot="itemTwo" src={dogsTrue} alt="True photo of two dogs running side-by-side in shallow water" />
-</Comparison>
+<PaperFigure name="method" alt="SaLR teacher–student training: compact safe-chains and mathematical reasoning traces supervise a latent student. Safety examples align a four-token response prefix, while math examples align a single position at answer onset.">
+  <strong>Two kinds of supervision, one compact reasoner.</strong> Safety examples use a four-token response prefix for hidden-state distillation; math examples use a single position at answer onset. The evaluated latent reasoning budget is six steps.
+</PaperFigure>
 
-### Tab panels
+For the full training objective, experimental setup, ablations, and additional results, see the [paper](https://wanglne.github.io/papers/SaLR_NIPS2026.pdf). Training and evaluation code is available in the [SaLR repository](https://github.com/wanglne/SaLR).
 
-Tab panels are a great way to display a labeled collection of related visuals without taking up too much space.
+</section>
 
-<Tabs defaultValue="true">
-  <TabsList>
-    <TabsTrigger value="true">Ground truth</TabsTrigger>
-    <TabsTrigger value="diffc">DiffC (Flux-dev)</TabsTrigger>
-    <TabsTrigger value="msillm">MS-ILLM</TabsTrigger>
-  </TabsList>
-  <TabsContent value="true">
-    <Picture
-      src={dogsTrue}
-      alt="True photo of two dogs running side-by-side in shallow water"
-    />
-  </TabsContent>
-  <TabsContent value="diffc">
-    <Picture
-      src={dogsDiffc}
-      alt="Photo of two running dogs, lossily compressed using the DiffC algorithm"
-    />
-  </TabsContent>
-  <TabsContent value="msillm">
-    <Picture
-      src={dogsMsillm}
-      alt="Photo of two running dogs, lossily compressed using MS-ILLM"
-    />
-  </TabsContent>
-</Tabs>
+<section id="results" aria-labelledby="results-title">
 
-### Carousel
+<h2 id="results-title">Results</h2>
 
-A carousel is another useful pattern for a collection of visuals that don't necessarily have meaningful labels.
+### A better safety–utility balance
 
-<Carousel>
-  <CarouselSlide>
-    <Picture src={dogsTrue} alt="True photo of two dogs running side-by-side in shallow water" />
-  </CarouselSlide>
-  <CarouselSlide>
-    <Picture src={dogsDiffc} alt="Photo of two running dogs, lossily compressed using the DiffC algorithm" />
-  </CarouselSlide>
-  <CarouselSlide>
-    <Picture
-      src={dogsMsillm}
-      alt="Photo of two running dogs, lossily compressed using MS-ILLM"
-    />
-  </CarouselSlide>
-</Carousel>
+SaLR keeps reported jailbreak success at or below 3.1% across the evaluated 1B, 3B, and 8B settings. Its benefit goes beyond rejecting harmful requests: it preserves much of the reasoning ability of latent models and keeps their compact generation budget.
 
-## Two columns
+<Results />
 
-Use the two columns component to display two columns of content. In this example, the first column contains a YouTube video embed and the second column contains an interactive 3D model viewer. By default, they display side by side, but if the screen is narrow enough (for example, on mobile), they're arranged vertically.
+### Safety gains without blanket refusal
 
-<TwoColumns>
-  <YouTubeVideo slot="left" videoId="wjZofJX0v4M" />
-  <ModelViewer slot="right" src="/BoxVertexColors.glb" alt="A cube colored with a rainbow gradient" />
-</TwoColumns>
+On XSTest and OKTest, SaLR maintains strong refusal of harmful requests while matching or improving benign over-refusal rates relative to the evaluated base and safety-augmented models. For the 3B model, unsafe refusal is **95.5%**, while benign over-refusal is **2.0% on XSTest** and **0.33% on OKTest**.
 
-## $\LaTeX$
+### The way safety is taught matters
 
-You can also add $\LaTeX$ formulas, rendered during the build process using [$\KaTeX$](https://katex.org/) so they're quick to load for visitors of your project page. You can write them inline, like this: $a^2 + b^2 = c^2$. Or, you can write them as a block:
+Simply adding the original SafeChain data to CODI lowers jailbreak success but substantially reduces reasoning accuracy. On 1B OOD math tasks, CODI + SafeChain reaches **42.62%** average accuracy; SaLR reaches **55.74%** with the same average token count. Compact safety supervision makes a meaningful difference to what the model retains.
 
-$$
-\int_a^b f(x) dx
-$$
+The trade-off is still real: SaLR’s in-domain GSM8K-Aug accuracy is 2.33–3.12 percentage points below CODI across the three scales. OOD accuracy is nearly unchanged at 1B and 3B, with a 1.71-point drop at 8B. The result is a favorable balance of safety, utility, and efficiency.
 
-## Citation
+### What if the attack targets reasoning itself?
 
-If you copy your bibliography into `./bibliography.bib`, you can cite papers using their BibTeX keys, and they'll be automatically formatted and included in the bibliography section at the end. For example: [@vaswani2017attention]. Note that these citations are distinct from footnotes[^mynote], which show up in a separate section if you use them.
+An attacker may try to make a model think for much longer, or hijack its chain of thought. These attacks expose another reason to study the reasoning process itself: a safe final answer is only one part of reliable behavior.
 
-[^mynote]: On the web, they should really be called "endnotes", since each page constitutes a full document.
+<AttackResults />
 
-## Table
+</section>
 
-Add simple tables using [GitHub Flavored Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-tables):
+<section id="citation">
 
-| Model | Accuracy | F1 score | Training time (hours) |
-| :--- | :---: | :---: | :---: |
-| BERT-base | 0.89 | 0.87 | 4.5 |
-| RoBERTa-large | 0.92 | 0.91 | 7.2 |
-| DistilBERT | 0.86 | 0.84 | 2.1 |
-| XLNet | 0.90 | 0.89 | 6.8 |
+<h2>Citation</h2>
 
-## BibTeX citation
-
-Displaying the BibTeX entry for your paper in a code block makes it easy to copy and paste.
+If you find SaLR useful for your research, please consider citing our [paper](https://wanglne.github.io/papers/SaLR_NIPS2026.pdf):
 
 ```bibtex
-@misc{roman2024academic,
-  author = "{Roman Hauksson}",
-  title = "Academic Project Page Template",
-  year = "2024",
-  howpublished = "\url{https://research-template.roman.technology}",
+@inproceedings{wang2026safetyaware,
+  title={Safety-Aware Latent Space Reasoning in Large Language Models},
+  author={Yi Wang and Wenjie Wang and Hongye Qiu and Yu Pan},
+  booktitle={The Fortieth Annual Conference on Neural Information Processing Systems},
+  year={2026},
+  url={https://openreview.net/forum?id=v5ExASonPK}
 }
 ```
 
-## Bibliography
-
-[^ref]
+</section>

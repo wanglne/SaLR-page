@@ -22,3 +22,13 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Local visual QA artifacts
+output/
+.playwright-cli/
+
+# Local paper source inputs; web-ready figures are tracked in public/figures
+/SaLR_NIPS2026.pdf
+/SaLR_NIPS2026.zip
+/SaLR_intro.pdf
+/SaLR_method.pdf

@@ -1,0 +1,218 @@
+---
+import results from "../data/results.json";
+const scales = ["1B", "3B", "8B"] as const;
+const categories = [
+  {
+    id: "safety",
+    name: "Jailbreak robustness",
+    title: "Attack success rate ↓",
+    source: "Table 2",
+    note: "ASR@1 (%), mean ± standard deviation over five runs. GCG is a white-box attack; PAIR is a black-box attack. Lower is better.",
+    columns: [
+      "HarmBench · GCG",
+      "HarmBench · PAIR",
+      "AdvBench · GCG",
+      "AdvBench · PAIR",
+      "JailbreakBench · GCG",
+      "JailbreakBench · PAIR",
+      "MaliciousInstruct · GCG",
+      "MaliciousInstruct · PAIR",
+    ],
+  },
+  {
+    id: "reasoning",
+    name: "Reasoning & efficiency",
+    title: "Reasoning accuracy ↑ · Generated tokens ↓",
+    source: "Table 3",
+    note: "Accuracy (%), mean ± standard deviation over five runs where reported. OOD averages cover GSM-Hard, MultiArith, and SVAMP. Token counts are average generated tokens, not latency measurements.",
+    columns: [
+      "GSM8K-Aug · Accuracy ↑",
+      "GSM8K-Aug · Tokens ↓",
+      "GSM-Hard · Accuracy ↑",
+      "MultiArith · Accuracy ↑",
+      "SVAMP · Accuracy ↑",
+      "OOD average · Accuracy ↑",
+      "OOD average · Tokens ↓",
+    ],
+  },
+  {
+    id: "refusal",
+    name: "Benign requests",
+    title: "Refuse harmful requests. Stay helpful on benign ones.",
+    source: "Table 6",
+    note: "Refusal rates (%). Higher unsafe refusal is better; lower over-refusal on benign prompts is better.",
+    columns: [
+      "XSTest · Unsafe refusal ↑",
+      "XSTest · Over-refusal ↓",
+      "OKTest · Over-refusal ↓",
+    ],
+  },
+] as const;
+---
+
+<div class="results-explorer breakout not-prose" data-results>
+  <div class="results-toolbar">
+    <div>
+      <span class="eyebrow">Explore the evidence</span><p>
+        Three scales. Safety, utility, and efficiency.
+      </p>
+    </div>
+    <label for="model-scale"
+      >Model <select id="model-scale"
+        ><option value="1B">LLaMA 3.2 · 1B</option><option value="3B"
+          >LLaMA 3.2 · 3B</option
+        ><option value="8B">LLaMA 3.1 · 8B</option></select
+      ></label
+    >
+  </div>
+  <div class="result-tabs" role="tablist" aria-label="Evaluation category">
+    {
+      categories.map((category, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`tab-${category.id}`}
+          aria-controls={`panel-${category.id}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          data-category={category.id}
+        >
+          {category.name}
+        </button>
+      ))
+    }
+  </div>
+  {
+    categories.map((category, i) => (
+      <section
+        role="tabpanel"
+        id={`panel-${category.id}`}
+        aria-labelledby={`tab-${category.id}`}
+        hidden={i !== 0}
+        tabindex="0"
+      >
+        <div class="table-heading">
+          <>
+            <h3>{category.title}</h3>
+            <span>{category.source}</span>
+          </>
+        </div>
+        {scales.map((scale, j) => (
+          <div data-scale={scale} hidden={j !== 0}>
+            <div
+              class="table-scroll"
+              tabindex="0"
+              role="region"
+              aria-label={`${scale} ${category.name} results; scroll horizontally for all columns`}
+            >
+              <table>
+                <caption class="sr-only">
+                  {scale} {category.name}. {category.note}
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Method</th>
+                    {category.columns.map((column) => (
+                      <th scope="col">
+                        {column.split(" · ")[0]}
+                        <span>{column.split(" · ")[1]}</span>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {results[category.id][scale].map((row) => (
+                    <tr class:list={{ "salr-row": row.method === "SaLR" }}>
+                      <th scope="row">
+                        {row.method}
+                        {row.method === "SaLR" && (
+                          <span class="ours">Ours</span>
+                        )}
+                      </th>
+                      {row.values.map((cell) => (
+                        <td>
+                          {cell.value}
+                          {"sd" in cell && <small> ± {cell.sd}</small>}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+        <p class="table-note">{category.note}</p>
+      </section>
+    ))
+  }
+  <noscript
+    ><p class="table-note">
+      Enable JavaScript to switch model scales and evaluation categories. All
+      results are also available in the <a
+        href="https://wanglne.github.io/papers/SaLR_NIPS2026.pdf">paper</a
+      >.
+    </p></noscript
+  >
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>("[data-results]").forEach((root) => {
+    const tabs = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+    );
+    const activate = (tab: HTMLButtonElement) => {
+      tabs.forEach((button) => {
+        const selected = button === tab;
+        button.setAttribute("aria-selected", String(selected));
+        button.tabIndex = selected ? 0 : -1;
+        const panel = root.querySelector<HTMLElement>(
+          `#${button.getAttribute("aria-controls")}`,
+        );
+        if (panel) panel.hidden = !selected;
+      });
+    };
+    document
+      .querySelectorAll<HTMLElement>("[data-result-category]")
+      .forEach((link) => {
+        link.addEventListener("click", () => {
+          const tab = tabs.find(
+            (button) => button.dataset.category === link.dataset.resultCategory,
+          );
+          if (tab) activate(tab);
+          const select = root.querySelector<HTMLSelectElement>("select");
+          if (select) {
+            select.value = "1B";
+            select.dispatchEvent(new Event("change"));
+          }
+        });
+      });
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activate(tab));
+      tab.addEventListener("keydown", (event) => {
+        const offset =
+          event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+        const next =
+          event.key === "Home"
+            ? tabs[0]
+            : event.key === "End"
+              ? tabs[tabs.length - 1]
+              : offset
+                ? tabs[(index + offset + tabs.length) % tabs.length]
+                : null;
+        if (next) {
+          event.preventDefault();
+          activate(next);
+          next.focus();
+        }
+      });
+    });
+    root
+      .querySelector<HTMLSelectElement>("select")
+      ?.addEventListener("change", (event) => {
+        const scale = (event.target as HTMLSelectElement).value;
+        root.querySelectorAll<HTMLElement>("[data-scale]").forEach((panel) => {
+          panel.hidden = panel.dataset.scale !== scale;
+        });
+      });
+  });
+</script>

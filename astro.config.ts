@@ -13,6 +13,7 @@ import astroExpressiveCode from "astro-expressive-code";
 
 // https://astro.build/config
 export default defineConfig({
+  devToolbar: { enabled: false },
   vite: {
     plugins: [tailwindcss()],
   },
@@ -33,6 +34,8 @@ export default defineConfig({
     icon(),
     astroExpressiveCode({
       styleOverrides: {
+        codeFontSize: "1rem",
+        codeLineHeight: "1.5",
         borderRadius: "0.5rem",
         borderWidth: "0",
         codeBackground: ({ theme }) =>
@@ -49,7 +52,16 @@ export default defineConfig({
   ],
   fonts: [
     {
-      provider: fontProviders.google(),
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          {
+            src: ["./src/assets/fonts/noto-sans-latin.woff2"],
+            weight: "100 900",
+            style: "normal",
+          },
+        ],
+      },
       name: "Noto Sans",
       cssVariable: "--font-noto-sans",
       weights: ["100 900"],

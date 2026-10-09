@@ -1,0 +1,367 @@
+---
+interface Props {
+  name: "intro" | "method";
+  alt: string;
+}
+const { name, alt } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const src = `${base}/figures/salr-${name}.svg`;
+const figures = {
+  intro: {
+    width: 770,
+    height: 402,
+    title: "Explore the overview",
+    steps: [
+      {
+        label: "The safety gap",
+        title: "Compact reasoning can increase jailbreak risk",
+        description:
+          "The first panel compares attack success on AdvBench. Under GCG, the base model reaches 38.8%, while CODI reaches 90.9%. Saving reasoning tokens does not, by itself, preserve safety alignment.",
+        box: [0, 0, 404, 214],
+      },
+      {
+        label: "Inside the model",
+        title: "Safe and unsafe requests become less distinct",
+        description:
+          "The second panel visualizes hidden states before response generation. Safe and unsafe queries are more entangled in the latent model. This representation-level evidence supports the behavioral finding; the visualization alone does not establish causality.",
+        box: [410, 0, 360, 214],
+      },
+      {
+        label: "Compact supervision",
+        title: "Keep the safety decisions, shorten the trace",
+        description:
+          "A four-block safe-chain captures the request, its risk, the response action, and a safe follow-up. It preserves the logic needed for safe behavior in a form that can fit a small latent reasoning budget.",
+        box: [0, 220, 404, 182],
+      },
+      {
+        label: "The balance",
+        title: "Improve safety while retaining reasoning utility",
+        description:
+          "The final panel places SaLR near the low-attack-success, high-accuracy corner. The goal is to improve robustness while retaining useful reasoning, rather than refusing every request. Explore the detailed results below for the measured trade-offs.",
+        box: [410, 220, 360, 182],
+      },
+    ],
+  },
+  method: {
+    width: 832,
+    height: 337,
+    title: "Walk through SaLR",
+    steps: [
+      {
+        label: "Training signals",
+        title: "Teach safety and reasoning together",
+        description:
+          "Safety examples pair a user request with a compact safe-chain and a safe response. Mathematical examples pair a question with a structured reasoning trace and its answer. Both kinds of supervision are needed for a useful, safety-aware reasoner.",
+        box: [0, 33, 190, 303],
+      },
+      {
+        label: "Teacher → student",
+        title: "Transfer explicit reasoning into hidden states",
+        description:
+          "The teacher learns from the explicit trace and target response. The student learns to generate the response after a latent rollout, without observing that trace. Hidden-state distillation connects the two branches at the transition into the response.",
+        box: [198, 33, 634, 134],
+      },
+      {
+        label: "Safety alignment",
+        title: "Guide the first four tokens of a safe response",
+        description:
+          "For safety examples, SaLR aligns teacher and student hidden states over a response prefix of K = 4 tokens. The four aligned positions shown here guide the student toward a safe response trajectory.",
+        box: [234, 201, 190, 63],
+      },
+      {
+        label: "Reasoning utility",
+        title: "Keep mathematical supervision focused",
+        description:
+          "For mathematical examples, distillation aligns a single position at the answer onset. This transfers reasoning information while helping retain the utility and token efficiency of the latent model.",
+        box: [546, 203, 252, 82],
+      },
+      {
+        label: "At inference",
+        title: "Use a fixed latent budget, then answer",
+        description:
+          "At inference, only the student branch is used. The evaluated model takes six latent reasoning steps and then generates its response, without exposing a long textual chain of thought. The teacher and explicit traces are used during training.",
+        box: [217, 36, 288, 122],
+      },
+    ],
+  },
+};
+const { width, height, title, steps } = figures[name];
+---
+
+<figure class="paper-figure breakout">
+  <salr-figure
+    class="figure-player not-prose"
+    data-name={name}
+    data-full-box={`0 0 ${width} ${height}`}
+    style={`--figure-ratio: ${width} / ${height}`}
+  >
+    <div class="figure-toolbar" hidden>
+      <span>{title}</span>
+      <button type="button" class="figure-play" aria-pressed="false"
+        >Play explanation</button
+      >
+    </div>
+    <div class="figure-stage">
+      <img
+        class="figure-fallback"
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading="lazy"
+        decoding="async"
+      />
+      <svg
+        class="figure-viewport"
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label={alt}
+        data-alt={alt}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <clipPath id={`figure-clip-${name}`}>
+            <rect class="figure-clip" x="0" y="0" width={width} height={height}
+            ></rect>
+          </clipPath>
+        </defs>
+        <g clip-path={`url(#figure-clip-${name})`}>
+          <image href={src} width={width} height={height} />
+          <rect
+            class="figure-focus"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            vector-effect="non-scaling-stroke"
+            rx="4"
+            visibility="hidden"></rect>
+        </g>
+      </svg>
+    </div>
+    <div
+      class="figure-steps"
+      role="group"
+      aria-label={`Choose a ${name === "intro" ? "overview" : "method"} explanation step`}
+      hidden
+    >
+      <button type="button" data-step="-1" aria-pressed="true"
+        >Full figure</button
+      >
+      {
+        steps.map((step, index) => (
+          <button
+            type="button"
+            data-step={index}
+            data-box={step.box.join(" ")}
+            data-title={step.title}
+            data-description={step.description}
+            aria-pressed="false"
+          >
+            <span class="figure-step-number" aria-hidden="true">
+              {index + 1}
+            </span>
+            {step.label}
+          </button>
+        ))
+      }
+    </div>
+    <div class="figure-narrative" aria-live="polite" aria-atomic="true" hidden>
+      <h3></h3>
+      <p></p>
+    </div>
+  </salr-figure>
+  <figcaption>
+    <slot />
+    <a class="figure-zoom" href={src} target="_blank"
+      >Open the original figure at full size ↗</a
+    >
+  </figcaption>
+</figure>
+
+<script>
+  class SaLRFigure extends HTMLElement {
+    private cleanup?: () => void;
+
+    connectedCallback() {
+      if (this.cleanup) return;
+      const svg = this.querySelector<SVGSVGElement>(".figure-viewport")!;
+      const focus = this.querySelector<SVGRectElement>(".figure-focus")!;
+      const clip = this.querySelector<SVGRectElement>(".figure-clip")!;
+      const play = this.querySelector<HTMLButtonElement>(".figure-play")!;
+      const controls = this.querySelector<HTMLElement>(".figure-steps")!;
+      const buttons = Array.from(
+        controls.querySelectorAll<HTMLButtonElement>("button"),
+      );
+      const steps = buttons.filter((button) => button.dataset.step !== "-1");
+      const narrative = this.querySelector<HTMLElement>(".figure-narrative")!;
+      const heading = narrative.querySelector("h3")!;
+      const paragraph = narrative.querySelector("p")!;
+      const fullBox = this.dataset.fullBox!.split(" ").map(Number);
+      const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const controller = new AbortController();
+      const { signal } = controller;
+      let currentBox = [...fullBox];
+      let index = -1;
+      let playing = false;
+      let timer: number | undefined;
+      let frame = 0;
+
+      const playbackLabel = () => {
+        this.classList.toggle("is-playing", playing);
+        play.setAttribute("aria-pressed", String(playing));
+        play.textContent = playing
+          ? "Pause explanation"
+          : index === steps.length - 1
+            ? "Replay explanation"
+            : "Play explanation";
+        narrative.setAttribute("aria-live", playing ? "off" : "polite");
+      };
+      const pause = () => {
+        window.clearTimeout(timer);
+        playing = false;
+        playbackLabel();
+      };
+      const zoomTo = (destination: number[]) => {
+        cancelAnimationFrame(frame);
+        const start = [...currentBox];
+        const started = performance.now();
+        const tick = (now: number) => {
+          const progress = motion.matches
+            ? 1
+            : Math.min((now - started) / 800, 1);
+          const eased =
+            progress < 0.5
+              ? 4 * progress ** 3
+              : 1 - (-2 * progress + 2) ** 3 / 2;
+          currentBox = start.map(
+            (value, i) => value + (destination[i] - value) * eased,
+          );
+          svg.setAttribute("viewBox", currentBox.join(" "));
+          ["x", "y", "width", "height"].forEach((key, i) =>
+            clip.setAttribute(key, String(currentBox[i])),
+          );
+          if (progress < 1) frame = requestAnimationFrame(tick);
+        };
+        if (motion.matches) tick(started);
+        else frame = requestAnimationFrame(tick);
+      };
+      const showStep = (next: number) => {
+        index = next;
+        buttons.forEach((button) =>
+          button.setAttribute(
+            "aria-pressed",
+            String(Number(button.dataset.step) === index),
+          ),
+        );
+        const step = steps[index];
+        narrative.hidden = !step;
+        focus.setAttribute("visibility", step ? "visible" : "hidden");
+        if (step) {
+          const box = step.dataset.box!.split(" ").map(Number);
+          heading.textContent = step.dataset.title!;
+          paragraph.textContent = step.dataset.description!;
+          svg.setAttribute(
+            "aria-label",
+            `${svg.dataset.alt} ${step.dataset.title}`,
+          );
+          ["x", "y", "width", "height"].forEach((key, i) =>
+            focus.setAttribute(key, String(box[i] + (i < 2 ? 2 : -4))),
+          );
+          zoomTo(box);
+        } else {
+          svg.setAttribute("aria-label", svg.dataset.alt!);
+          zoomTo(fullBox);
+        }
+        playbackLabel();
+      };
+      const schedule = () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          if (index < steps.length - 1) {
+            showStep(index + 1);
+            schedule();
+          } else pause();
+        }, 7000);
+      };
+
+      buttons.forEach((button) =>
+        button.addEventListener(
+          "click",
+          () => {
+            pause();
+            showStep(Number(button.dataset.step));
+          },
+          { signal },
+        ),
+      );
+      play.addEventListener(
+        "click",
+        () => {
+          if (playing) return pause();
+          document.dispatchEvent(
+            new CustomEvent("salr:figure-play", { detail: this }),
+          );
+          if (index < 0 || index === steps.length - 1) showStep(0);
+          playing = true;
+          playbackLabel();
+          schedule();
+        },
+        { signal },
+      );
+      controls.addEventListener(
+        "keydown",
+        (event) => {
+          const selected = buttons.indexOf(event.target as HTMLButtonElement);
+          if (selected < 0) return;
+          const keys: Record<string, number> = {
+            ArrowRight: (selected + 1) % buttons.length,
+            ArrowLeft: (selected - 1 + buttons.length) % buttons.length,
+            Home: 0,
+            End: buttons.length - 1,
+          };
+          if (!(event.key in keys)) return;
+          event.preventDefault();
+          const button = buttons[keys[event.key]];
+          button.focus();
+          button.click();
+        },
+        { signal },
+      );
+      document.addEventListener(
+        "salr:figure-play",
+        (event) => {
+          if ((event as CustomEvent).detail !== this) pause();
+        },
+        { signal },
+      );
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (document.hidden) pause();
+        },
+        { signal },
+      );
+      const observer = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting && playing) pause();
+      });
+      observer.observe(this);
+
+      this.setAttribute("data-enhanced", "");
+      this.querySelector<HTMLElement>(".figure-toolbar")!.hidden = false;
+      controls.hidden = false;
+      this.cleanup = () => {
+        controller.abort();
+        observer.disconnect();
+        window.clearTimeout(timer);
+        cancelAnimationFrame(frame);
+      };
+    }
+
+    disconnectedCallback() {
+      this.cleanup?.();
+      this.cleanup = undefined;
+    }
+  }
+  if (!customElements.get("salr-figure"))
+    customElements.define("salr-figure", SaLRFigure);
+</script>
