@@ -38,7 +38,7 @@ const categories = [
   {
     id: "refusal",
     name: "Benign requests",
-    title: "Refuse harmful requests. Stay helpful on benign ones.",
+    title: "Unsafe refusal ↑ · Benign over-refusal ↓",
     source: "Table 6",
     note: "Refusal rates (%). Higher unsafe refusal is better; lower over-refusal on benign prompts is better.",
     columns: [
@@ -53,8 +53,9 @@ const categories = [
 <div class="results-explorer breakout not-prose" data-results>
   <div class="results-toolbar">
     <div>
-      <span class="eyebrow">Explore the evidence</span><p>
-        Three scales. Safety, utility, and efficiency.
+      <span class="eyebrow">Compare model performance</span><p>
+        Safety, reasoning utility, and token efficiency across three model
+        scales.
       </p>
     </div>
     <label for="model-scale"
