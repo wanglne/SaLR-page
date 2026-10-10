@@ -1,4 +1,8 @@
 ---
+const modelNames: Record<string, string> = {
+  "1B": "LLaMA 3.2-1B",
+  "3B": "LLaMA 3.2-3B",
+};
 const inflation = [
   ["1B", "FreshQA", "87.26 → 1,190.76", "13.65×", "26.89 → 10.24", "0.38×"],
   [
@@ -35,6 +39,10 @@ const inflation = [
     "0.60×",
   ],
 ];
+const inflationGroups = Object.entries(modelNames).map(([scale, model]) => ({
+  model,
+  rows: inflation.filter((row) => row[0] === scale),
+}));
 const hcot = [
   ["1B", "26.0%", "8.8%", "0.0%"],
   ["3B", "24.0%", "6.4%", "0.0%"],
@@ -49,26 +57,19 @@ const adaptive = [
 
 <div class="attack-callouts not-prose">
   <article>
-    <span class="eyebrow">OverThink · Token inflation</span><h3>
-      A bounded reasoning budget
-    </h3><p>
-      OverThink aims to increase inference cost by inflating reasoning length.
-      On 1B FreshQA, SFT-CoT's generated token count grows <strong
-        >13.65×</strong
-      > under attack, while SaLR's falls to <strong>0.38×</strong> its clean count.
-      No token inflation is observed for SaLR across the six tested model–task combinations,
-      using its fixed latent reasoning budget.
+    <h3 class="eyebrow">OverThink · Token inflation</h3>
+    <p>
+      On 1B FreshQA, OverThink increases SFT-CoT's generated token count by
+      <strong>13.65×</strong>, while SaLR's token ratio is <strong>0.38×</strong>.
+      SaLR shows no token inflation across the six evaluated model task settings.
     </p>
   </article>
   <article>
-    <span class="eyebrow">H-CoT · Reasoning hijacking</span><h3>
-      No successful H-CoT attacks in our evaluation
-    </h3><p>
-      H-CoT attempts to redirect an exposed chain of thought toward a harmful
-      response. SaLR performs its intermediate reasoning in latent states
-      without emitting this textual trace. On Malicious-Educator, it records <strong
+    <h3 class="eyebrow">H-CoT · Reasoning hijacking</h3>
+    <p>
+      On Malicious-Educator, SaLR records <strong
         >0 successful attacks out of 250 attempts</strong
-      > at each of the 1B and 3B scales.
+      > per model at both 1B and 3B.
     </p>
   </article>
 </div>
@@ -82,32 +83,44 @@ const adaptive = [
       role="region"
       aria-label="OverThink results; scroll horizontally for all columns"
     >
-      <table>
+      <table class="overthink-table">
         <thead
           ><tr
-            ><th scope="col">Scale</th><th scope="col">Task</th><th scope="col"
+            ><th scope="col" class="overthink-model-cell">Model</th><th
+              scope="col">Task</th
+            ><th scope="col"
               >SFT-CoT tokens</th
-            ><th scope="col">Inflation</th><th scope="col">SaLR tokens</th><th
-              scope="col">Inflation</th
+            ><th scope="col">Token ratio</th><th scope="col">SaLR tokens</th><th
+              scope="col">Token ratio</th
             ></tr
           ></thead
-        ><tbody
-          >{
-            inflation.map((row) => (
-              <tr>
-                {row.map((cell, index) =>
-                  index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>,
-                )}
-              </tr>
-            ))
-          }</tbody
         >
+        {
+          inflationGroups.map((group) => (
+            <tbody>
+              {group.rows.map((row, rowIndex) => (
+                <tr>
+                  {rowIndex === 0 && (
+                    <th
+                      scope="rowgroup"
+                      rowspan={group.rows.length}
+                      class="overthink-model-cell"
+                    >
+                      {group.model}
+                    </th>
+                  )}
+                  {row.slice(1).map((cell, index) => (
+                    <td class:list={{ "salr-value": index >= 3 }}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          ))
+        }
       </table>
     </div>
     <p class="table-note">
-      Inflation = attacked / clean average generated tokens. Lower is better.
-      Preventing token inflation does not mean preserving task accuracy under
-      attack; the paper reports accuracy and latency separately.
+      Token ratio = attacked / clean average generated tokens.
     </p>
     <h3>H-CoT: attack success per attempt (%) ↓</h3>
     <div
@@ -119,7 +132,7 @@ const adaptive = [
       <table>
         <thead
           ><tr
-            ><th scope="col">Scale</th><th scope="col">SFT-CoT</th><th
+            ><th scope="col">Model</th><th scope="col">SFT-CoT</th><th
               scope="col">SFT-CoT + SafeChain</th
             ><th scope="col">SaLR</th></tr
           ></thead
@@ -128,7 +141,11 @@ const adaptive = [
             hcot.map((row) => (
               <tr>
                 {row.map((cell, index) =>
-                  index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>,
+                  index === 0 ? (
+                    <th scope="row">{modelNames[cell] ?? cell}</th>
+                  ) : (
+                    <td class:list={{ "salr-value": index === 3 }}>{cell}</td>
+                  ),
                 )}
               </tr>
             ))
@@ -162,7 +179,7 @@ const adaptive = [
       <table>
         <thead
           ><tr
-            ><th scope="col">Scale</th><th scope="col">Method</th><th
+            ><th scope="col">Model</th><th scope="col">Method</th><th
               scope="col">Crescendo</th
             ><th scope="col">Constrained latent</th><th scope="col"
               >Unconstrained latent</th
@@ -171,9 +188,19 @@ const adaptive = [
         ><tbody
           >{
             adaptive.map((row) => (
-              <tr class:list={{ "salr-row": row[1] === "SaLR" }}>
+              <tr>
                 {row.map((cell, index) =>
-                  index === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>,
+                  index === 0 ? (
+                    <th scope="row">{modelNames[cell] ?? cell}</th>
+                  ) : (
+                    <td
+                      class:list={{
+                        "salr-value": row[1] === "SaLR" && index >= 2,
+                      }}
+                    >
+                      {cell}
+                    </td>
+                  ),
                 )}
               </tr>
             ))

@@ -14,12 +14,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   <div class="header-inner">
     <h1><code>SaLR</code></h1>
     <p class="publication-title">{title}</p>
-    <p class="conference-label">NeurIPS 2026</p>
+    <p class="conference-label">NeurIPS 2026 · Main Track</p>
     <div class="authors">
       {
         // prettier-ignore
         authors.map((author) => (
-          <span>{author.url ? <a href={author.url}>{author.name}</a> : author.name}{author.notes && <sup>{author.notes}</sup>}</span>
+          <span>{author.url ? <a href={author.url} target="_blank" rel="noopener noreferrer">{author.name}</a> : author.name}{author.notes && <sup>{author.notes}</sup>}</span>
         ))
       }
     </div>
@@ -40,7 +40,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     <div class="publication-links not-prose">
       {
         links.map((link) => (
-          <a href={link.url}>
+          <a href={link.url} target="_blank" rel="noopener noreferrer">
             <>
               <Icon name={link.icon} />
               <span>{link.name}</span>

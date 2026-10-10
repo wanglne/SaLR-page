@@ -7,6 +7,7 @@ thumbnail: social-preview.png
 ---
 
 import Header from "./components/Header.astro";
+import SectionNav from "./components/SectionNav.astro";
 import PaperFigure from "./components/PaperFigure.astro";
 import Results from "./components/Results.astro";
 import AttackResults from "./components/AttackResults.astro";
@@ -27,50 +28,31 @@ import AttackResults from "./components/AttackResults.astro";
   ]}
 />
 
+<SectionNav />
+
 <section id="impact" className="lead-section full-bleed" aria-labelledby="impact-title">
   <div className="section-inner">
   <h2 id="impact-title">Impact</h2>
-  <p className="lead-copy">Latent reasoning reduces generated tokens by moving intermediate reasoning from text into continuous hidden states. Our study shows that this shift can also weaken safety alignment. <strong>SaLR substantially improves jailbreak robustness while retaining most of the reasoning utility and token efficiency of latent models.</strong> The work highlights a requirement for efficient reasoning: models need to preserve their ability to recognize risk and respond safely as their reasoning becomes more compact.</p>
+  <p className="lead-copy">Latent space reasoning reduces the token cost of explicit chain-of-thought (CoT) by moving intermediate reasoning into continuous latent states, but our study finds that this shift can increase vulnerability to jailbreak attacks. We introduce <strong>SaLR</strong>, which combines compact four-block safe-chains with prefix hidden state distillation to improve safety alignment. <strong>Across model scales, SaLR substantially reduces jailbreak success while retaining most reasoning utility and the token efficiency of latent space reasoning.</strong> These findings highlight the need to maintain safe behavior as reasoning becomes more compact.</p>
   </div>
 </section>
 
 <div className="headline-results breakout not-prose">
-  <article><span className="metric">≤ 3.1<span>%</span></span><h3>Mean jailbreak attack success</h3><p>Across 24 settings spanning four benchmarks, GCG and PAIR attacks, and three model scales.</p><a href="#results" data-result-category="safety">Explore safety results →</a></article>
-  <article><span className="metric">55.74<span>%</span></span><h3>OOD math accuracy</h3><p>Nearly matching CODI’s 55.84% on the 1B model, with the same average output length of 7.5 tokens.</p><a href="#results" data-result-category="reasoning">Compare reasoning utility →</a></article>
-  <article><span className="metric">39<span>×</span></span><h3>Fewer generated tokens</h3><p>On 1B OOD math tasks, SaLR generates 7.5 tokens on average, versus 293.3 for SFT-CoT + SafeChain.</p><a href="#results" data-result-category="reasoning">Compare token counts →</a></article>
+  <article><span className="metric">≤ 3.1<span>%</span></span><h3>ASR in each tested setting</h3><p>Across 24 settings spanning four safety benchmarks, GCG and PAIR attacks, and three model scales.</p><a href="#results" data-result-category="safety">Explore safety results →</a></article>
+  <article><span className="metric">59.23<span>%</span></span><h3>3B math accuracy</h3><p>Compared with 59.86% for CODI, averaged across four math benchmarks.</p><a href="#results" data-result-category="reasoning" data-result-scale="3B">Compare reasoning utility →</a></article>
+  <article><span className="metric">≈40<span>×</span></span><h3>Token count reduction</h3><p>On 3B math tasks, SaLR averages 7.4 tokens, versus 293.8 for SFT-CoT + SafeChain.</p><a href="#results" data-result-category="reasoning" data-result-scale="3B">Compare token counts →</a></article>
 </div>
-<p className="metric-source">Results from Tables 2–3. OOD averages cover GSM-Hard, MultiArith, and SVAMP. The rounded 39× ratio compares generated token counts; it does not measure inference latency.</p>
-
-<section id="abstract" aria-labelledby="abstract-title">
-
-<h2 id="abstract-title">Abstract</h2>
-
-Latent space reasoning improves inference efficiency by compressing chain-of-thought (CoT) reasoning into continuous latent states, but its safety alignment remains poorly understood. In this work, we conduct the first systematic safety study of latent space reasoning models under jailbreak attacks. Our results reveal that most latent reasoning methods exhibit higher vulnerability to jailbreak attacks than both the base model and token-space CoT reasoning counterparts, suggesting that moving reasoning into latent states can weaken safety alignment. To address this issue, we propose **SaLR**, a **S**afety-**a**ware **L**atent space **R**easoning framework that injects safety supervision into latent space reasoning. SaLR converts long-form safety reasoning into a compact four-block safe-chain and transfers this safety signal through teacher-student hidden state distillation. For safety instances, SaLR aligns an early safe response prefix to guide the model toward a safe response trajectory; for reasoning instances, it retains single-position distillation to maintain reasoning utility. Experiments across model scales and harmful benchmarks show that SaLR substantially reduces jailbreak attack success while retaining most of the reasoning utility and token efficiency. Beyond standard jailbreaks, SaLR also shows robustness to reasoning-specific attacks such as token inflation and CoT hijacking, while using a fixed latent reasoning budget and avoiding exposed textual reasoning traces. Overall, SaLR provides a favorable safety–utility trade-off for latent space reasoning. Code is available in the [SaLR repository](https://github.com/wanglne/SaLR).
-
-</section>
+<p className="metric-source">Results from Tables 2 and 3. ASR values are means over five runs per setting. Math and token averages cover GSM8K-Aug, GSM-Hard, MultiArith, and SVAMP.</p>
 
 <section id="overview" aria-labelledby="overview-title">
 
 <h2 id="overview-title">Overview</h2>
 
-### The safety question behind latent reasoning
+<PaperFigure name="intro" alt="SaLR overview: latent reasoning baselines show higher jailbreak attack success and weaker separation of safe and unsafe representations; compact safety supervision improves the safety–utility balance." />
 
-Explicit chain-of-thought reasoning can improve performance on complex tasks, but generating the intermediate trace adds tokens and inference cost. Latent reasoning compresses these intermediate steps into continuous hidden states, allowing the model to produce an answer with far fewer generated tokens.
+### Why Does Latent Space Reasoning Need Dedicated Safety Alignment?
 
-This changes how safety can be learned and evaluated. Textual traces offer readable targets for supervision, while latent states are less directly interpretable. Training on the final response only indirectly constrains the hidden reasoning that precedes it. The central question is **whether moving reasoning into latent space preserves a model’s safety alignment**.
-
-We investigate this question by comparing the LLaMA 3.2-1B base model, SFT-CoT, and representative latent reasoning methods under GCG and PAIR attacks. The evaluated latent models are generally more vulnerable than both the base model and SFT-CoT. On AdvBench under GCG, attack success rises from **38.8% for the base model** to **61.0% for SFT-CoT** and **90.9% for CODI**.
-
-The hidden states before response generation show a related pattern. Safe and unsafe requests are more clearly separated in the base model, become more mixed after SFT-CoT training, and are further entangled in CODI. The safety gap appears in both the model’s responses and its internal representations.
-
-<PaperFigure name="intro" alt="SaLR overview: latent reasoning baselines show higher jailbreak attack success and weaker separation of safe and unsafe representations; compact safety supervision improves the safety–utility balance.">
-  <strong>From diagnosing the safety gap to improving the balance.</strong> Panels (a) and (b) show increased jailbreak vulnerability and weaker separation of safe and unsafe representations. Panels (c) and (d) introduce compact safety supervision and the resulting safety–utility balance.
-</PaperFigure>
-
-<div className="takeaway">
-  <p className="eyebrow">Why this matters</p>
-  <p><strong>Compressing a reasoning trace needs to preserve the safety decisions behind it.</strong> Our findings motivate supervision that reaches the transition from latent reasoning to response generation, where the model begins to form its reply.</p>
-</div>
+Textual chain-of-thought (CoT) provides explicit intermediate steps that can be supervised directly, whereas latent reasoning does not expose a readable reasoning trace. Training on final responses therefore only indirectly constrains the preceding latent states. This motivates safety supervision at the transition from latent reasoning to response generation, as implemented in SaLR.
 
 </section>
 
@@ -78,19 +60,11 @@ The hidden states before response generation show a related pattern. Safe and un
 
 <h2 id="methodology-title">Methodology</h2>
 
-### Safety supervision at the transition into a response
+<PaperFigure name="method" alt="SaLR teacher–student training: compact safe-chains and mathematical reasoning traces supervise a latent student. Safety examples align a four-token response prefix, while math examples align a single position at answer onset." />
 
-SaLR first rewrites long safety rationales into a compact four-block safe-chain: **request intent, risk assessment, response action, and safe follow-up.** The action is chosen from **refuse, partial, or allow**. This structure preserves the core safety decisions while making the supervision compact enough to fit a small latent reasoning budget.
+SaLR rewrites long form safety rationales into compact four-block safe-chains: request intent, risk assessment, response action, and safe follow-up. The action is selected from refuse, partial, or allow.
 
-During training, the teacher learns from the explicit reasoning trace and target response. The student reasons through latent states and then generates the response without reading that trace. SaLR transfers the teacher’s supervision through hidden-state distillation at the start of the response. Safety examples align the first **four response positions (K = 4)** to guide a safe response trajectory; mathematical examples retain **single-position alignment at the answer onset** to preserve reasoning utility.
-
-<PaperFigure name="method" alt="SaLR teacher–student training: compact safe-chains and mathematical reasoning traces supervise a latent student. Safety examples align a four-token response prefix, while math examples align a single position at answer onset.">
-  <strong>Compact traces and response-prefix distillation.</strong> Safety and mathematical examples use different alignment strategies within the same teacher–student framework: a four-token prefix for safety and a single position for mathematics.
-</PaperFigure>
-
-At inference, only the student is used. The evaluated model takes **six latent reasoning steps** before generating its response, retaining a fixed reasoning budget without emitting a long textual chain of thought.
-
-The [paper](https://wanglne.github.io/papers/SaLR_NIPS2026.pdf) provides the full training objective, experimental setup, ablations, and additional results. Training and evaluation code is available in the [SaLR repository](https://github.com/wanglne/SaLR).
+During training, the teacher learns from explicit reasoning traces and target responses, while the student reasons through latent states. SaLR aligns teacher and student hidden states across the first four response prefix positions (K = 4) for safety examples, and uses single position alignment at the answer onset for mathematical examples.
 
 </section>
 
@@ -98,25 +72,13 @@ The [paper](https://wanglne.github.io/papers/SaLR_NIPS2026.pdf) provides the ful
 
 <h2 id="results-title">Results</h2>
 
-### Jailbreak robustness across benchmarks and model scales
-
-Across four harmful benchmarks, GCG and PAIR attacks, and 1B, 3B, and 8B models, SaLR keeps mean attack success at or below **3.1%**. On 1B AdvBench, for example, it reduces attack success to **2.7% under GCG** and **1.2% under PAIR**. We evaluate these safety gains alongside mathematical reasoning, token efficiency, and responses to benign requests.
-
 <Results />
 
-### Refusing harmful requests with low benign over-refusal
+Across 24 settings (3 model scales × 2 attacks × 4 benchmarks), SaLR achieves a mean jailbreak ASR of at most **3.1% in each setting**. On the 3B model, it achieves **59.23%** average math accuracy, close to CODI's **59.86%**, while using approximately **40× fewer generated tokens** than SFT-CoT + SafeChain. Its benign over-refusal rates are **2.0% on XSTest and 0.33% on OKTest.** Together, these results demonstrate a favorable balance between jailbreak robustness, reasoning utility, and benign request handling.
 
-A low jailbreak success rate needs to be considered alongside the model’s usefulness on benign requests. XSTest and OKTest evaluate this distinction. For the 3B model, SaLR refuses **95.5% of unsafe XSTest prompts**, while its over-refusal rates on benign prompts are **2.0% on XSTest** and **0.33% on OKTest**. These results show that strong refusal of harmful requests can coexist with low refusal of benign ones.
+### Robustness to Attacks on the Reasoning Process
 
-### Preserving reasoning utility through compact supervision
-
-Adding the original SafeChain data to CODI lowers jailbreak success, but also substantially reduces reasoning accuracy. On 1B OOD math tasks, CODI + SafeChain reaches **42.62%** average accuracy, compared with **55.74%** for SaLR at the same average token count. The comparison highlights the importance of adapting safety supervision to the limited capacity of latent reasoning.
-
-The improvement involves a measurable trade-off. Relative to CODI, SaLR’s in-domain GSM8K-Aug accuracy is **2.33–3.12 percentage points lower** across the three scales. OOD accuracy remains nearly unchanged at 1B and 3B, with a **1.71-point decrease at 8B**. SaLR retains most of the reasoning utility of the latent baseline while substantially improving its jailbreak robustness.
-
-### Robustness to attacks on the reasoning process
-
-We also evaluate attacks that target the reasoning process itself: **OverThink**, which inflates reasoning length to increase inference cost, and **H-CoT**, which attempts to redirect an exposed chain of thought toward a harmful response. Further tests examine multi-turn jailbreaks and direct perturbations of latent reasoning states.
+Beyond standard jailbreaks, we evaluate OverThink token inflation, H-CoT reasoning hijacking, Crescendo multi-turn attacks, and white-box perturbations of latent reasoning states.
 
 <AttackResults />
 
@@ -126,7 +88,7 @@ We also evaluate attacks that target the reasoning process itself: **OverThink**
 
 <h2>Citation</h2>
 
-If you find SaLR useful for your research, please consider citing our [paper](https://wanglne.github.io/papers/SaLR_NIPS2026.pdf):
+If you find SaLR useful for your research, please consider citing our <a href="https://wanglne.github.io/papers/SaLR_NIPS2026.pdf" target="_blank" rel="noopener noreferrer">paper</a>:
 
 ```bibtex
 @inproceedings{wang2026safetyaware,

@@ -32,7 +32,7 @@ The GitHub Actions workflow deploys to GitHub Pages when pushed to `main`. Enabl
 
 The headline token comparison uses the 1B OOD averages (293.3 / 7.5 ≈ 39×); it is not a latency claim. The overview figure is reproduced from the paper, with its original plotting conventions. Detailed web tables use the paper's reported values without recomputing standard deviations.
 
-The page follows Impact → Abstract → Overview → Methodology → Results → Citation. Figure explanations use the original SVG assets; playback starts only when requested, respects reduced-motion preferences, and pauses when the figure leaves view.
+The page follows Impact → Overview → Methodology → Results → Citation. Figure explanations use the original SVG assets; playback starts only when requested, respects reduced-motion preferences, and pauses when the figure leaves view.
 
 ## Acknowledgment
 

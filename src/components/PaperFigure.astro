@@ -11,33 +11,36 @@ const figures = {
     width: 770,
     height: 402,
     title: "Explore the overview",
+    fullTitle: "Safety diagnosis and SaLR overview",
+    fullDescription:
+      "Panels (a) and (b) show jailbreak vulnerability and hidden state separation. Panels (c) and (d) illustrate compact safe-chains and the safety utility comparison.",
     steps: [
       {
         label: "Jailbreak risk",
-        title: "Increased vulnerability in latent reasoning models",
+        title: "(a) Jailbreak vulnerability",
         description:
-          "On 1B AdvBench under GCG, attack success rises from 38.8% for the base model to 61.0% for SFT-CoT and 90.9% for CODI. The comparison reveals a safety gap as reasoning moves from text into latent states.",
+          "On 1B AdvBench under GCG, ASR is 38.8% for Base, 61.0% for SFT-CoT, and 90.9% for CODI, compared with 2.7% for SaLR.",
         box: [0, 0, 404, 214],
       },
       {
         label: "Internal states",
-        title: "Weaker separation of safe and unsafe requests",
+        title: "(b) Weaker separation of safe and unsafe queries",
         description:
-          "Before response generation, safe and unsafe queries are more clearly separated in the base model, become more mixed in SFT-CoT, and are further entangled in CODI. This pattern is consistent with the increased jailbreak vulnerability observed in the first panel.",
+          "Before response generation, the visualized hidden states show increasing overlap between safe and unsafe queries from Base to SFT-CoT to CODI.",
         box: [410, 0, 360, 214],
       },
       {
         label: "Compact safe-chain",
-        title: "Preserving the core safety decisions",
+        title: "(c) Compact safety supervision",
         description:
-          "The safe-chain records the request intent, risk assessment, response action, and safe follow-up. These four blocks preserve the key decisions behind a safe response while making the supervision compact enough for a small latent reasoning budget.",
+          "Each safe-chain contains four blocks: a request summary, risk assessment, response action (refuse, partial, or allow), and safe follow-up.",
         box: [0, 220, 404, 182],
       },
       {
         label: "Safety and utility",
-        title: "Lower jailbreak success with retained reasoning utility",
+        title: "(d) Safety utility comparison",
         description:
-          "The final panel compares jailbreak success with OOD mathematical accuracy. SaLR combines substantially lower attack success with accuracy close to CODI. The detailed results below examine this balance across model scales, benchmarks, and benign requests.",
+          "On the 1B model, SaLR achieves 2.0% mean ASR on AdvBench under GCG and PAIR and 55.74% OOD math accuracy, compared with 88.2% ASR and 55.84% accuracy for CODI.",
         box: [410, 220, 360, 182],
       },
     ],
@@ -46,19 +49,22 @@ const figures = {
     width: 832,
     height: 337,
     title: "Walk through SaLR",
+    fullTitle: "Compact traces and response prefix distillation",
+    fullDescription:
+      "Safety examples align hidden states across four response prefix positions (K = 4), while mathematical examples use single position alignment at the answer onset.",
     steps: [
       {
         label: "Training signals",
         title: "Compact safety traces and mathematical reasoning",
         description:
-          "Safety examples pair a request with a compact safe-chain and a safe response. Mathematical examples pair a question with a structured reasoning trace and its answer. Combining them provides safety supervision while helping preserve useful reasoning.",
-        box: [0, 33, 190, 303],
+          "Safety examples pair a request with a compact safe-chain and a safe response. Mathematical examples pair a question with a structured reasoning trace and its answer.",
+        box: [0, 0, 192, 337],
       },
       {
         label: "Teacher → student",
         title: "Distilling explicit reasoning into a latent student",
         description:
-          "The teacher learns from the explicit trace and target response. The student uses latent reasoning and does not read that trace. Hidden-state distillation transfers the teacher’s supervision at the transition from latent reasoning into response generation.",
+          "The teacher learns from the explicit trace and target response. The student uses latent space reasoning and does not read that trace. Hidden state distillation transfers the teacher’s supervision at the transition from latent space reasoning into response generation.",
         box: [198, 33, 634, 134],
       },
       {
@@ -66,14 +72,14 @@ const figures = {
         title: "Aligning the start of a safe response",
         description:
           "For safety examples, SaLR aligns teacher and student hidden states over the first four response positions (K = 4). This prefix supervision guides the student toward a safe response trajectory as it begins to generate its reply.",
-        box: [234, 201, 190, 63],
+        box: [233, 186, 297, 98],
       },
       {
         label: "Reasoning utility",
-        title: "Preserving mathematical reasoning supervision",
+        title: "Single position alignment for mathematical reasoning",
         description:
-          "Mathematical examples retain single-position distillation at the answer onset. This transfers reasoning information to the student while helping preserve the accuracy and token efficiency of latent reasoning.",
-        box: [546, 203, 252, 82],
+          "Mathematical examples align teacher and student hidden states at a single position at the answer onset.",
+        box: [546, 186, 252, 98],
       },
       {
         label: "At inference",
@@ -85,10 +91,11 @@ const figures = {
     ],
   },
 };
-const { width, height, title, steps } = figures[name];
+const { width, height, title, fullTitle, fullDescription, steps } =
+  figures[name];
 ---
 
-<figure class="paper-figure breakout">
+<figure class="paper-figure breakout" aria-labelledby={`figure-title-${name}`}>
   <salr-figure
     class="figure-player not-prose"
     data-name={name}
@@ -138,14 +145,22 @@ const { width, height, title, steps } = figures[name];
         </g>
       </svg>
     </div>
+    <div class="figure-narrative" aria-live="polite" aria-atomic="true">
+      <h3 id={`figure-title-${name}`}>{fullTitle}</h3>
+      <p>{fullDescription}</p>
+    </div>
     <div
       class="figure-steps"
       role="group"
       aria-label={`Choose a ${name === "intro" ? "overview" : "method"} explanation step`}
       hidden
     >
-      <button type="button" data-step="-1" aria-pressed="true"
-        >Full figure</button
+      <button
+        type="button"
+        data-step="-1"
+        data-title={fullTitle}
+        data-description={fullDescription}
+        aria-pressed="true">Full figure</button
       >
       {
         steps.map((step, index) => (
@@ -165,17 +180,7 @@ const { width, height, title, steps } = figures[name];
         ))
       }
     </div>
-    <div class="figure-narrative" aria-live="polite" aria-atomic="true" hidden>
-      <h3></h3>
-      <p></p>
-    </div>
   </salr-figure>
-  <figcaption>
-    <slot />
-    <a class="figure-zoom" href={src} target="_blank"
-      >Open the original figure at full size ↗</a
-    >
-  </figcaption>
 </figure>
 
 <script>
@@ -254,12 +259,12 @@ const { width, height, title, steps } = figures[name];
           ),
         );
         const step = steps[index];
-        narrative.hidden = !step;
+        const selected = step ?? buttons[0];
+        heading.textContent = selected.dataset.title!;
+        paragraph.textContent = selected.dataset.description!;
         focus.setAttribute("visibility", step ? "visible" : "hidden");
         if (step) {
           const box = step.dataset.box!.split(" ").map(Number);
-          heading.textContent = step.dataset.title!;
-          paragraph.textContent = step.dataset.description!;
           svg.setAttribute(
             "aria-label",
             `${svg.dataset.alt} ${step.dataset.title}`,

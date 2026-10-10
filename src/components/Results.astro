@@ -1,6 +1,19 @@
 ---
 import results from "../data/results.json";
+import Wide from "./Wide.astro";
 const scales = ["1B", "3B", "8B"] as const;
+const methodFeatures: Record<string, readonly [boolean, boolean]> = {
+  "Base model": [false, false],
+  "No-CoT": [false, false],
+  "SFT-CoT": [false, false],
+  "CODI-NL": [true, false],
+  "CoLaR-2": [true, false],
+  Coconut: [true, false],
+  CODI: [true, false],
+  "SFT-CoT + SafeChain": [false, true],
+  "CODI + SafeChain": [true, true],
+  SaLR: [true, true],
+};
 const categories = [
   {
     id: "safety",
@@ -9,14 +22,10 @@ const categories = [
     source: "Table 2",
     note: "ASR@1 (%), mean ± standard deviation over five runs. GCG is a white-box attack; PAIR is a black-box attack. Lower is better.",
     columns: [
-      "HarmBench · GCG",
-      "HarmBench · PAIR",
-      "AdvBench · GCG",
-      "AdvBench · PAIR",
-      "JailbreakBench · GCG",
-      "JailbreakBench · PAIR",
-      "MaliciousInstruct · GCG",
-      "MaliciousInstruct · PAIR",
+      { name: "HarmBench", metrics: ["GCG", "PAIR"] },
+      { name: "AdvBench", metrics: ["GCG", "PAIR"] },
+      { name: "JailbreakBench", metrics: ["GCG", "PAIR"] },
+      { name: "MaliciousInstruct", metrics: ["GCG", "PAIR"] },
     ],
   },
   {
@@ -24,138 +33,186 @@ const categories = [
     name: "Reasoning & efficiency",
     title: "Reasoning accuracy ↑ · Generated tokens ↓",
     source: "Table 3",
-    note: "Accuracy (%), mean ± standard deviation over five runs where reported. OOD averages cover GSM-Hard, MultiArith, and SVAMP. Token counts are average generated tokens, not latency measurements.",
+    note: "Accuracy (%), mean ± standard deviation over five runs where reported. OOD averages cover GSM-Hard, MultiArith, and SVAMP. Token counts are average generated tokens.",
     columns: [
-      "GSM8K-Aug · Accuracy ↑",
-      "GSM8K-Aug · Tokens ↓",
-      "GSM-Hard · Accuracy ↑",
-      "MultiArith · Accuracy ↑",
-      "SVAMP · Accuracy ↑",
-      "OOD average · Accuracy ↑",
-      "OOD average · Tokens ↓",
+      { name: "GSM8K-Aug", metrics: ["Accuracy ↑", "Tokens ↓"] },
+      { name: "GSM-Hard", metrics: ["Accuracy ↑"] },
+      { name: "MultiArith", metrics: ["Accuracy ↑"] },
+      { name: "SVAMP", metrics: ["Accuracy ↑"] },
+      { name: "OOD average", metrics: ["Accuracy ↑", "Tokens ↓"] },
     ],
   },
   {
     id: "refusal",
-    name: "Benign requests",
+    name: "Refusal behavior",
     title: "Unsafe refusal ↑ · Benign over-refusal ↓",
     source: "Table 6",
     note: "Refusal rates (%). Higher unsafe refusal is better; lower over-refusal on benign prompts is better.",
     columns: [
-      "XSTest · Unsafe refusal ↑",
-      "XSTest · Over-refusal ↓",
-      "OKTest · Over-refusal ↓",
+      { name: "XSTest", metrics: ["Unsafe refusal ↑", "Over-refusal ↓"] },
+      { name: "OKTest", metrics: ["Over-refusal ↓"] },
     ],
   },
 ] as const;
 ---
 
-<div class="results-explorer breakout not-prose" data-results>
-  <div class="results-toolbar">
-    <div>
-      <span class="eyebrow">Compare model performance</span><p>
-        Safety, reasoning utility, and token efficiency across three model
-        scales.
-      </p>
+<Wide maxWidth="70rem">
+  <div class="results-explorer not-prose" data-results>
+    <div class="results-toolbar">
+      <span class="eyebrow">Compare model performance</span>
+      <label for="model-scale"
+        >Model <select id="model-scale"
+          ><option value="1B">LLaMA 3.2 · 1B</option><option value="3B"
+            >LLaMA 3.2 · 3B</option
+          ><option value="8B">LLaMA 3.1 · 8B</option></select
+        ></label
+      >
     </div>
-    <label for="model-scale"
-      >Model <select id="model-scale"
-        ><option value="1B">LLaMA 3.2 · 1B</option><option value="3B"
-          >LLaMA 3.2 · 3B</option
-        ><option value="8B">LLaMA 3.1 · 8B</option></select
-      ></label
-    >
-  </div>
-  <div class="result-tabs" role="tablist" aria-label="Evaluation category">
+    <div class="result-tabs" role="tablist" aria-label="Evaluation category">
+      {
+        categories.map((category, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`tab-${category.id}`}
+            aria-controls={`panel-${category.id}`}
+            aria-selected={i === 0 ? "true" : "false"}
+            tabindex={i === 0 ? 0 : -1}
+            data-category={category.id}
+          >
+            {category.name}
+          </button>
+        ))
+      }
+    </div>
     {
       categories.map((category, i) => (
-        <button
-          type="button"
-          role="tab"
-          id={`tab-${category.id}`}
-          aria-controls={`panel-${category.id}`}
-          aria-selected={i === 0 ? "true" : "false"}
-          tabindex={i === 0 ? 0 : -1}
-          data-category={category.id}
+        <section
+          role="tabpanel"
+          id={`panel-${category.id}`}
+          aria-labelledby={`tab-${category.id}`}
+          hidden={i !== 0}
+          tabindex="0"
         >
-          {category.name}
-        </button>
-      ))
-    }
-  </div>
-  {
-    categories.map((category, i) => (
-      <section
-        role="tabpanel"
-        id={`panel-${category.id}`}
-        aria-labelledby={`tab-${category.id}`}
-        hidden={i !== 0}
-        tabindex="0"
-      >
-        <div class="table-heading">
-          <>
-            <h3>{category.title}</h3>
-            <span>{category.source}</span>
-          </>
-        </div>
-        {scales.map((scale, j) => (
-          <div data-scale={scale} hidden={j !== 0}>
-            <div
-              class="table-scroll"
-              tabindex="0"
-              role="region"
-              aria-label={`${scale} ${category.name} results; scroll horizontally for all columns`}
-            >
-              <table>
-                <caption class="sr-only">
-                  {scale} {category.name}. {category.note}
-                </caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Method</th>
-                    {category.columns.map((column) => (
-                      <th scope="col">
-                        {column.split(" · ")[0]}
-                        <span>{column.split(" · ")[1]}</span>
+          <div class="table-heading">
+            <>
+              <h3>{category.title}</h3>
+              <span>{category.source}</span>
+            </>
+          </div>
+          {scales.map((scale, j) => (
+            <div data-scale={scale} hidden={j !== 0}>
+              <div
+                class="table-scroll"
+                tabindex="0"
+                role="region"
+                aria-label={`${scale} ${category.name} results; scroll horizontally for all columns`}
+              >
+                <table>
+                  <caption class="sr-only">
+                    {scale} {category.name}. {category.note}
+                  </caption>
+                  <colgroup>
+                    <col class="result-method-column" />
+                  </colgroup>
+                  <colgroup>
+                    <col class="result-feature-column" />
+                    <col class="result-feature-column" />
+                  </colgroup>
+                  {category.columns.map((column) => (
+                    <colgroup span={column.metrics.length} />
+                  ))}
+                  <thead>
+                    <tr>
+                      <th scope="col" rowspan="2" class="result-method-cell">
+                        Method
                       </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {results[category.id][scale].map((row) => (
-                    <tr class:list={{ "salr-row": row.method === "SaLR" }}>
-                      <th scope="row">
-                        {row.method}
-                        {row.method === "SaLR" && (
-                          <span class="ours">Ours</span>
-                        )}
+                      <th
+                        scope="col"
+                        rowspan="2"
+                        class="result-feature-heading"
+                      >
+                        Latent
+                        <br />
+                        Reasoning
                       </th>
-                      {row.values.map((cell) => (
-                        <td>
-                          {cell.value}
-                          {"sd" in cell && <small> ± {cell.sd}</small>}
-                        </td>
+                      <th
+                        scope="col"
+                        rowspan="2"
+                        class="result-feature-heading"
+                      >
+                        Safety
+                        <br />
+                        Data
+                      </th>
+                      {category.columns.map((column) => (
+                        <th scope="colgroup" colspan={column.metrics.length}>
+                          {column.name}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                    <tr>
+                      {category.columns.flatMap((column) =>
+                        column.metrics.map((metric) => (
+                          <th scope="col">{metric}</th>
+                        )),
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results[category.id][scale].map((row) => (
+                      <tr class:list={{ "salr-row": row.method === "SaLR" }}>
+                        <th scope="row" class="result-method-cell">
+                          {row.method}
+                          {row.method === "SaLR" && (
+                            <span class="ours">(Ours)</span>
+                          )}
+                        </th>
+                        {methodFeatures[
+                          row.method.replace(/\s*\+\s*/g, " + ")
+                        ].map((enabled) => (
+                          <td>
+                            <span
+                              class:list={[
+                                "result-feature-mark",
+                                enabled ? "feature-yes" : "feature-no",
+                              ]}
+                              role="img"
+                              aria-label={enabled ? "Yes" : "No"}
+                            >
+                              {enabled ? "✓" : "✗"}
+                            </span>
+                          </td>
+                        ))}
+                        {row.values.map((cell) => (
+                          <td>
+                            {cell.value}
+                            {"sd" in cell && <small> ± {cell.sd}</small>}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        ))}
-        <p class="table-note">{category.note}</p>
-      </section>
-    ))
-  }
-  <noscript
-    ><p class="table-note">
-      Enable JavaScript to switch model scales and evaluation categories. All
-      results are also available in the <a
-        href="https://wanglne.github.io/papers/SaLR_NIPS2026.pdf">paper</a
-      >.
-    </p></noscript
-  >
-</div>
+          ))}
+          <p class="table-note">{category.note}</p>
+        </section>
+      ))
+    }
+    <noscript
+      ><p class="table-note">
+        Enable JavaScript to switch model scales and evaluation categories. All
+        results are also available in the <a
+          href="https://wanglne.github.io/papers/SaLR_NIPS2026.pdf"
+          target="_blank"
+          rel="noopener noreferrer">paper</a
+        >.
+      </p></noscript
+    >
+  </div>
+</Wide>
 <script>
   document.querySelectorAll<HTMLElement>("[data-results]").forEach((root) => {
     const tabs = Array.from(
@@ -182,7 +239,7 @@ const categories = [
           if (tab) activate(tab);
           const select = root.querySelector<HTMLSelectElement>("select");
           if (select) {
-            select.value = "1B";
+            select.value = link.dataset.resultScale ?? "1B";
             select.dispatchEvent(new Event("change"));
           }
         });
