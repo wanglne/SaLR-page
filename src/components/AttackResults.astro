@@ -53,6 +53,10 @@ const adaptive = [
   ["3B", "CODI", "82.67", "43.00", "57.00"],
   ["3B", "SaLR", "5.33", "1.00", "8.00"],
 ];
+const adaptiveGroups = Object.entries(modelNames).map(([scale, model]) => ({
+  model,
+  rows: adaptive.filter((row) => row[0] === scale),
+}));
 ---
 
 <div class="attack-callouts not-prose">
@@ -166,9 +170,8 @@ const adaptive = [
   >
   <div class="details-body">
     <p>
-      SaLR also lowers attack success when an adversary escalates requests
-      across multiple turns or directly perturbs the latent reasoning states.
-      These tests extend the evaluation beyond standard single-turn jailbreaks.
+      Crescendo tests multi-turn jailbreaks, while the latent rollout attacks use
+      white-box access to perturb intermediate reasoning states.
     </p>
     <div
       class="table-scroll"
@@ -181,37 +184,37 @@ const adaptive = [
           ><tr
             ><th scope="col">Model</th><th scope="col">Method</th><th
               scope="col">Crescendo</th
-            ><th scope="col">Constrained latent</th><th scope="col"
+            ><th scope="col">Projected latent</th><th scope="col"
               >Unconstrained latent</th
             ></tr
           ></thead
-        ><tbody
-          >{
-            adaptive.map((row) => (
-              <tr>
-                {row.map((cell, index) =>
-                  index === 0 ? (
-                    <th scope="row">{modelNames[cell] ?? cell}</th>
-                  ) : (
-                    <td
-                      class:list={{
-                        "salr-value": row[1] === "SaLR" && index >= 2,
-                      }}
-                    >
+        >
+        {
+          adaptiveGroups.map((group) => (
+            <tbody>
+              {group.rows.map((row, rowIndex) => (
+                <tr>
+                  {rowIndex === 0 && (
+                    <th scope="rowgroup" rowspan={group.rows.length}>
+                      {group.model}
+                    </th>
+                  )}
+                  {row.slice(1).map((cell) => (
+                    <td class:list={{ "salr-value": row[1] === "SaLR" }}>
                       {cell}
                     </td>
-                  ),
-                )}
-              </tr>
-            ))
-          }</tbody
-        >
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          ))
+        }
       </table>
     </div>
     <p class="table-note">
-      Selected results from Table 7. ASR (%), lower is better. “Constrained”
-      denotes the norm-constrained latent rollout attack; “unconstrained”
-      removes that perturbation constraint.
+      Selected results from Table 7. ASR (%), lower is better. The projected latent
+      attack constrains perturbation norms, while the unconstrained variant
+      removes this constraint.
     </p>
   </div>
 </details>

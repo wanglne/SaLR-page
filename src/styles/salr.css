@@ -606,6 +606,9 @@ main .metric-source {
 .table-scroll thead tr:first-child > :first-child {
   background: #f4f4f5;
 }
+.table-scroll tbody th[scope="rowgroup"] {
+  vertical-align: middle;
+}
 .table-scroll table.overthink-table th.overthink-model-cell {
   min-width: 0;
   max-width: none;
