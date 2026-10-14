@@ -1,7 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 interface Props {
-  title: string;
+  title: string[];
   authors: { name: string; url?: string; notes?: string }[];
   affiliation: string;
   links: { name: string; url: string; icon: string }[];
@@ -12,8 +12,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 <header class="publication-header full-bleed">
   <div class="header-inner">
-    <h1><code>SaLR</code></h1>
-    <p class="publication-title">{title}</p>
+    <h1 class="publication-title">
+      {title.map((line) => <span>{line}{" "}</span>)}
+    </h1>
     <p class="conference-label">NeurIPS 2026 · Main Track</p>
     <div class="authors">
       {

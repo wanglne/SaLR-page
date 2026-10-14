@@ -56,6 +56,21 @@ export default defineConfig({
       options: {
         variants: [
           {
+            src: ["./src/assets/fonts/google-sans-latin-600.woff2"],
+            weight: "600",
+            style: "normal",
+          },
+        ],
+      },
+      name: "Google Sans",
+      cssVariable: "--font-google-sans",
+      weights: ["600"],
+    },
+    {
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          {
             src: ["./src/assets/fonts/noto-sans-latin.woff2"],
             weight: "100 900",
             style: "normal",

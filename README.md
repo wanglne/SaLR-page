@@ -36,6 +36,6 @@ The page follows Impact → Overview → Methodology → Results → Citation. F
 
 ## Acknowledgment
 
-The visual layout follows [PolyPose](https://polypose.csail.mit.edu/), with a common content width and matching header typography. Interactive tables remain specific to SaLR.
+The visual layout follows [PolyPose](https://polypose.csail.mit.edu/), with a common content width. The paper title uses Google Sans. Interactive tables remain specific to SaLR.
 
-Built with [Roman Hauksson-Neill's Academic Project Page Template](https://research-template.roman.technology/), using Astro, MDX, and Tailwind CSS. Noto Sans is bundled locally under the [SIL Open Font License](public/fonts/OFL.txt).
+Built with [Roman Hauksson-Neill's Academic Project Page Template](https://research-template.roman.technology/), using Astro, MDX, and Tailwind CSS. Noto Sans and Google Sans are bundled locally under their respective [Noto Sans](public/fonts/OFL.txt) and [Google Sans](public/fonts/Google-Sans-OFL.txt) SIL Open Font Licenses.

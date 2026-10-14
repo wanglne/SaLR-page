@@ -13,7 +13,10 @@ import Results from "./components/Results.astro";
 import AttackResults from "./components/AttackResults.astro";
 
 <Header
-  title="Safety-Aware Latent Space Reasoning in Large Language Models"
+  title={[
+    "Safety-Aware Latent Space Reasoning",
+    "in Large Language Models",
+  ]}
   affiliation="ShanghaiTech University"
   authors={[
     { name: "Yi Wang", url: "https://wanglne.github.io/", notes: "*" },
@@ -30,12 +33,7 @@ import AttackResults from "./components/AttackResults.astro";
 
 <SectionNav />
 
-<section id="impact" className="lead-section full-bleed" aria-labelledby="impact-title">
-  <div className="section-inner">
-  <h2 id="impact-title">Impact</h2>
-  <p className="lead-copy">Latent space reasoning reduces the token cost of explicit chain-of-thought (CoT) by moving intermediate reasoning into continuous latent states, but our study finds that this shift can increase vulnerability to jailbreak attacks. We introduce <strong>SaLR</strong>, which combines compact four-block safe-chains with prefix hidden state distillation to improve safety alignment. <strong>Across model scales, SaLR substantially reduces jailbreak success while retaining most reasoning utility and the token efficiency of latent space reasoning.</strong> These findings highlight the need to maintain safe behavior as reasoning becomes more compact.</p>
-  </div>
-</section>
+<section id="impact" className="impact-section" aria-labelledby="impact-title">
 
 <div className="headline-results breakout not-prose">
   <article><span className="metric">≤ 3.1<span>%</span></span><h3>ASR in each tested setting</h3><p>Across 24 settings spanning four safety benchmarks, GCG and PAIR attacks, and three model scales.</p><a href="#results" data-result-category="safety">Explore safety results →</a></article>
@@ -43,6 +41,15 @@ import AttackResults from "./components/AttackResults.astro";
   <article><span className="metric">≈40<span>×</span></span><h3>Token count reduction</h3><p>On 3B math tasks, SaLR averages 7.4 tokens, versus 293.8 for SFT-CoT + SafeChain.</p><a href="#results" data-result-category="reasoning" data-result-scale="3B">Compare token counts →</a></article>
 </div>
 <p className="metric-source">Results from Tables 2 and 3. ASR values are means over five runs per setting. Math and token averages cover GSM8K-Aug, GSM-Hard, MultiArith, and SVAMP.</p>
+
+<div className="lead-section full-bleed">
+  <div className="section-inner">
+  <h2 id="impact-title">Impact</h2>
+  <p className="lead-copy">Latent space reasoning reduces the token cost of explicit chain-of-thought (CoT) by moving intermediate reasoning into continuous latent states, but our study finds that this shift can increase vulnerability to jailbreak attacks. We introduce <strong>SaLR</strong>, which combines compact four-block safe-chains with prefix hidden state distillation to improve safety alignment. <strong>Across model scales, SaLR substantially reduces jailbreak success while retaining most reasoning utility and the token efficiency of latent space reasoning.</strong> These findings highlight the need to maintain safe behavior as reasoning becomes more compact.</p>
+  </div>
+</div>
+
+</section>
 
 <section id="overview" aria-labelledby="overview-title">
 
