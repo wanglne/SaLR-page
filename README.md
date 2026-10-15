@@ -30,7 +30,7 @@ The GitHub Actions workflow deploys to GitHub Pages when pushed to `main`. Enabl
 - `public/figures/`: SVG exports of the supplied overview and method PDFs. Text is outlined; original embedded images are preserved.
 - `src/styles/salr.css`: SaLR-specific presentation on top of the template.
 
-The headline token comparison uses the 1B OOD averages (293.3 / 7.5 ≈ 39×); it is not a latency claim. The overview figure is reproduced from the paper, with its original plotting conventions. Detailed web tables use the paper's reported values without recomputing standard deviations.
+The headline token comparison uses the 3B averages across all four math benchmarks (293.8 / 7.4 ≈ 40×). The overview figure is reproduced from the paper, with its original plotting conventions. Detailed web tables use the paper's reported values without recomputing standard deviations.
 
 The page follows Impact → Overview → Methodology → Results → Citation. Figure explanations use the original SVG assets; playback starts only when requested, respects reduced-motion preferences, and pauses when the figure leaves view.
 

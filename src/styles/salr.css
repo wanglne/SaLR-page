@@ -616,7 +616,7 @@ main .metric-source {
   font-size: 0.875rem;
   color: var(--page-muted);
 }
-.table-scroll .salr-row > *,
+.table-scroll tbody tr.salr-row > *,
 .table-scroll .salr-value {
   background: #fff7ed;
   color: #9a3412;

@@ -2,6 +2,7 @@
 import results from "../data/results.json";
 import Wide from "./Wide.astro";
 const scales = ["1B", "3B", "8B"] as const;
+const formatMethod = (method: string) => method.replace(/\s*\+\s*/g, " + ");
 const methodFeatures: Record<string, readonly [boolean, boolean]> = {
   "Base model": [false, false],
   "No-CoT": [false, false],
@@ -62,9 +63,9 @@ const categories = [
       <span class="eyebrow">Compare model performance</span>
       <label for="model-scale"
         >Model <select id="model-scale"
-          ><option value="1B">LLaMA 3.2 · 1B</option><option value="3B"
-            >LLaMA 3.2 · 3B</option
-          ><option value="8B">LLaMA 3.1 · 8B</option></select
+          ><option value="1B">LLaMA 3.2-1B</option><option value="3B"
+            >LLaMA 3.2-3B</option
+          ><option value="8B">LLaMA 3.1-8B</option></select
         ></label
       >
     </div>
@@ -163,14 +164,12 @@ const categories = [
                     {results[category.id][scale].map((row) => (
                       <tr class:list={{ "salr-row": row.method === "SaLR" }}>
                         <th scope="row" class="result-method-cell">
-                          {row.method}
+                          {formatMethod(row.method)}
                           {row.method === "SaLR" && (
                             <span class="ours">(Ours)</span>
                           )}
                         </th>
-                        {methodFeatures[
-                          row.method.replace(/\s*\+\s*/g, " + ")
-                        ].map((enabled) => (
+                        {methodFeatures[formatMethod(row.method)].map((enabled) => (
                           <td>
                             <span
                               class:list={[
